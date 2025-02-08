@@ -1,0 +1,41 @@
+version: "2.2"
+services:
+  web:
+    build: .
+    # 移除 container_name，这会影响日志和指标功能
+    # container_name: dujiaoka  
+    
+    # 使用 expose 替代 ports
+    expose:
+      - "80"
+      - "9000"
+    
+    volumes:
+      # 修改数据持久化路径,使用 ../files 确保数据持久化
+      - "../files/dujiaoka/.env:/app/.env"
+      - "../files/dujiaoka/install.lock:/app/install.lock" 
+      - "../files/dujiaoka/uploads:/app/public/uploads"
+    
+    environment:
+      WEB_DOCUMENT_ROOT: "/app/public"
+      TZ: Asia/Shanghai
+      
+    # 添加 Traefik 配置
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.dujiaoka.rule=Host(`your-domain.com`)"
+      - "traefik.http.routers.dujiaoka.entrypoints=websecure"
+      - "traefik.http.routers.dujiaoka.tls.certResolver=letsencrypt"
+      - "traefik.http.services.dujiaoka.loadbalancer.server.port=80"
+    
+    tty: true
+    restart: always
+    
+    # 添加到 dokploy-network
+    networks:
+      - dokploy-network
+
+# 声明外部网络      
+networks:
+  dokploy-network:
+    external: true
