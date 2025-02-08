@@ -1,9 +1,15 @@
-version: "2.2"
+# 注释: 移除 version 属性以避免警告
 services:
   web:
-    # 注释: 替换为 tobiasunterzeit/php 镜像，该镜像明确支持 arm64 架构
-    # 使用 nginx-php-fpm 组合镜像
-    image: tobiasunterzeit/php:7.4-fpm-nginx
+    # 注释: 使用官方的 arm64 支持的 PHP-FPM 镜像
+    image: arm64v8/php:7.4-fpm-alpine
+    
+    # 注释: 添加必要的 PHP 和 Nginx 安装命令
+    command: |
+      sh -c "apk add --no-cache nginx && \
+             docker-php-ext-install pdo_mysql mysqli && \
+             nginx && \
+             php-fpm"
     
     expose:
       - "80"
@@ -12,12 +18,12 @@ services:
     volumes:
       - "../files/dujiaoka/install.lock:/var/www/html/install.lock"
       - "../files/dujiaoka/uploads:/var/www/html/public/uploads"
-      # 注释: 添加应用代码挂载，并修改挂载路径以匹配新镜像的工作目录
       - "./:/var/www/html"
+      # 注释: 添加 nginx 配置
+      - "./nginx.conf:/etc/nginx/http.d/default.conf"
     
     environment:
       - TZ=Asia/Shanghai
-      # 注释: 添加 PHP 配置环境变量
       - PHP_MEMORY_LIMIT=256M
       - PHP_MAX_EXECUTION_TIME=300
       
