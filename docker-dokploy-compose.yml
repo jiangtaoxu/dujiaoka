@@ -1,9 +1,9 @@
 version: "2.2"
 services:
   web:
-    # 使用支持 ARM64 的镜像
-    # 注释: 替换原来的 webdevops/php-nginx:7.4 为支持 ARM 架构的镜像
-    image: dwchiang/nginx-php-fpm:7.4
+    # 注释: 替换为 tobiasunterzeit/php 镜像，该镜像明确支持 arm64 架构
+    # 使用 nginx-php-fpm 组合镜像
+    image: tobiasunterzeit/php:7.4-fpm-nginx
     
     expose:
       - "80"
@@ -12,10 +12,14 @@ services:
     volumes:
       - "../files/dujiaoka/install.lock:/var/www/html/install.lock"
       - "../files/dujiaoka/uploads:/var/www/html/public/uploads"
+      # 注释: 添加应用代码挂载，并修改挂载路径以匹配新镜像的工作目录
+      - "./:/var/www/html"
     
     environment:
       - TZ=Asia/Shanghai
-      # 注释: 删除了 WEB_DOCUMENT_ROOT 因为新镜像使用标准的 nginx 配置
+      # 注释: 添加 PHP 配置环境变量
+      - PHP_MEMORY_LIMIT=256M
+      - PHP_MAX_EXECUTION_TIME=300
       
     labels:
       - "traefik.enable=true"
