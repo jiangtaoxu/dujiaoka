@@ -10,7 +10,6 @@ services:
       - "9000"
     
     volumes:
-      - "../files/dujiaoka/.env:/var/www/html/.env"  # 注释: 修改目标路径为新镜像的工作目录
       - "../files/dujiaoka/install.lock:/var/www/html/install.lock"
       - "../files/dujiaoka/uploads:/var/www/html/public/uploads"
     
