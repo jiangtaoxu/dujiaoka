@@ -1,26 +1,23 @@
 version: "2.2"
 services:
   web:
-    build: .
-    # 移除 container_name，这会影响日志和指标功能
-    # container_name: dujiaoka  
+    # 使用支持 ARM64 的镜像
+    # 注释: 替换原来的 webdevops/php-nginx:7.4 为支持 ARM 架构的镜像
+    image: dwchiang/nginx-php-fpm:7.4
     
-    # 使用 expose 替代 ports
     expose:
       - "80"
       - "9000"
     
     volumes:
-      # 修改数据持久化路径,使用 ../files 确保数据持久化
-      - "../files/dujiaoka/.env:/app/.env"
-      - "../files/dujiaoka/install.lock:/app/install.lock" 
-      - "../files/dujiaoka/uploads:/app/public/uploads"
+      - "../files/dujiaoka/.env:/var/www/html/.env"  # 注释: 修改目标路径为新镜像的工作目录
+      - "../files/dujiaoka/install.lock:/var/www/html/install.lock"
+      - "../files/dujiaoka/uploads:/var/www/html/public/uploads"
     
     environment:
-      WEB_DOCUMENT_ROOT: "/app/public"
-      TZ: Asia/Shanghai
+      - TZ=Asia/Shanghai
+      # 注释: 删除了 WEB_DOCUMENT_ROOT 因为新镜像使用标准的 nginx 配置
       
-    # 添加 Traefik 配置
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.dujiaoka.rule=Host(`your-domain.com`)"
@@ -31,11 +28,9 @@ services:
     tty: true
     restart: always
     
-    # 添加到 dokploy-network
     networks:
       - dokploy-network
 
-# 声明外部网络      
 networks:
   dokploy-network:
     external: true
